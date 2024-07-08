@@ -242,7 +242,8 @@ function csvUpdate(){
 		(
 			cat ${tmpfile6} ${tmpfile7} ${tmpfile8} | 
 				sort | 
-				join -t "${TAB}" -1 2 -2 1 -a 2 -e 65534 -o 1.1,2.1,2.2 ${tmpfile10} - |
+				join -t "${TAB}" -1 2 -2 1 -a 2 -o 1.1,2.1,2.2 ${tmpfile10} - |
+				sed -e "s/^${TAB}/65534${TAB}/" |
 				sort -t "${TAB}" -k 1,1n -k 2,2 |
 				cut -d "${TAB}" -f 2,3 |
 				tr '\t' '=' | 
