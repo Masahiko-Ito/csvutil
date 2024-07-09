@@ -8,31 +8,31 @@ function csvSearch(){
 		return 0
 	fi
 
-	TAB=`echo -n -e "\t"`
-	cmd=""
+	csvSearch_TAB=`echo -n -e "\t"`
+	csvSearch_cmd=""
 	while [ "$#" != "0" ]
 	do
-		str=`echo "$1" | sed -e 's/"/\\\\"/g'`
+		csvSearch_str=`echo "$1" | sed -e 's/"/\\\\"/g'`
 		if [ "$#" = "1" ]
 		then
-			if [ "X${str}" = "X-" ]
+			if [ "X${csvSearch_str}" = "X-" ]
 			then
 				:
 			else
-				cmd="cat ${str}|${cmd}"
+				csvSearch_cmd="cat ${csvSearch_str}|${csvSearch_cmd}"
 			fi
 		else
-			if [ "X${cmd}" = "X" ]
+			if [ "X${csvSearch_cmd}" = "X" ]
 			then
-				cmd="egrep \"^${str}${TAB}|^${str}$|${TAB}${str}${TAB}|${TAB}${str}$\""
+				csvSearch_cmd="egrep \"^${csvSearch_str}${csvSearch_TAB}|^${csvSearch_str}$|${csvSearch_TAB}${csvSearch_str}${csvSearch_TAB}|${csvSearch_TAB}${csvSearch_str}$\""
 			else
-				cmd="${cmd}|egrep \"^${str}${TAB}|^${str}$|${TAB}${str}${TAB}|${TAB}${str}$\""
+				csvSearch_cmd="${csvSearch_cmd}|egrep \"^${csvSearch_str}${csvSearch_TAB}|^${csvSearch_str}$|${csvSearch_TAB}${csvSearch_str}${csvSearch_TAB}|${csvSearch_TAB}${csvSearch_str}$\""
 			fi
 		fi
 		shift
 	done
 
-	eval "${cmd}"
+	eval "${csvSearch_cmd}"
 }
 
 function csvAppend(){
@@ -44,55 +44,55 @@ function csvAppend(){
 		return 0
 	fi
 
-	TAB=`echo -n -e "\t"`; export TAB
-	tmpfile1=/tmp/csvutil.${RND}.$$.1.tmp
-	sortSw=off
-	rec=""
-	outf=""
+	csvAppend_TAB=`echo -n -e "\t"`; export csvAppend_TAB
+	csvAppend_tmpfile1=/tmp/csvutil.${RND}.$$.1.tmp
+	csvAppend_sortSw=off
+	csvAppend_rec=""
+	csvAppend_outf=""
 	while [ "$#" != "0" ]
 	do
-		str=`echo "$1" | sed -e 's/"/\\"/g'`
+		csvAppend_str=`echo "$1" | sed -e 's/"/\\"/g'`
 		if [ "$#" = "1" ]
 		then
-			outf="${str}"
+			csvAppend_outf="${csvAppend_str}"
 		else
-			if [ "X${str}" = "X-s" ]
+			if [ "X${csvAppend_str}" = "X-s" ]
 			then
-				sortSw=on
+				csvAppend_sortSw=on
 			else
-				if [ "X${rec}" = "X" ]
+				if [ "X${csvAppend_rec}" = "X" ]
 				then
-					rec="${str}"
+					csvAppend_rec="${csvAppend_str}"
 				else
-					rec="${rec}${TAB}${str}"
+					csvAppend_rec="${csvAppend_rec}${csvAppend_TAB}${csvAppend_str}"
 				fi
 			fi
 		fi
 		shift
 	done
 
-	if [ "X${outf}" = "X-"  ]
+	if [ "X${csvAppend_outf}" = "X-"  ]
 	then
-		if [ "X${sortSw}" = "Xon" ]
+		if [ "X${csvAppend_sortSw}" = "Xon" ]
 		then
 			(
 				cat
-				echo "${rec}"
+				echo "${csvAppend_rec}"
 			) | sort
 		else
 			cat
-			echo "${rec}"
+			echo "${csvAppend_rec}"
 		fi
 	else
-		if [ "X${sortSw}" = "Xon" ]
+		if [ "X${csvAppend_sortSw}" = "Xon" ]
 		then
 			(
-				cat ${outf}
-				echo "${rec}"
-			) | sort >${tmpfile1}
-			mv -f ${tmpfile1} ${outf}
+				cat ${csvAppend_outf}
+				echo "${csvAppend_rec}"
+			) | sort >${csvAppend_tmpfile1}
+			mv -f ${csvAppend_tmpfile1} ${csvAppend_outf}
 		else
-			echo "${rec}" >>${outf}
+			echo "${csvAppend_rec}" >>${csvAppend_outf}
 		fi
 	fi
 }
@@ -105,44 +105,44 @@ function csvDelete(){
 		return 0
 	fi
 
-	TAB=`echo -n -e "\t"`
-	LF=`echo -n -e "\n"`
+	csvDelete_TAB=`echo -n -e "\t"`
+	csvDelete_LF=`echo -n -e "\n"`
 	RND=${RANDOM}
-	tmpfile1=""
-	tmpfile2=/tmp/csvutil.${RND}.$$.2.tmp
-	file=""
-	cmd=""
+	csvDelete_tmpfile1=""
+	csvDelete_tmpfile2=/tmp/csvutil.${RND}.$$.2.tmp
+	csvDelete_file=""
+	csvDelete_cmd=""
 	while [ "$#" != "0" ]
 	do
-		str=`echo "$1" | sed -e 's/"/\\\\"/g'`
+		csvDelete_str=`echo "$1" | sed -e 's/"/\\\\"/g'`
 		if [ "$#" = "1" ]
 		then
-			if [ "X${str}" = "X-" ]
+			if [ "X${csvDelete_str}" = "X-" ]
 			then
-				tmpfile1=/tmp/csvutil.${RND}.$$.1.tmp
-				cat >${tmpfile1}
-				cmd="cat ${tmpfile1}|${cmd}"
+				csvDelete_tmpfile1=/tmp/csvutil.${RND}.$$.1.tmp
+				cat >${csvDelete_tmpfile1}
+				csvDelete_cmd="cat ${csvDelete_tmpfile1}|${csvDelete_cmd}"
 			else
-				file=${str}
-				cmd="cat ${str}|${cmd}"
+				csvDelete_file=${csvDelete_str}
+				csvDelete_cmd="cat ${csvDelete_str}|${csvDelete_cmd}"
 			fi
 		else
-			if [ "X${cmd}" = "X" ]
+			if [ "X${csvDelete_cmd}" = "X" ]
 			then
-				cmd="egrep \"^${str}${TAB}|^${str}$|${TAB}${str}${TAB}|${TAB}${str}$\""
+				csvDelete_cmd="egrep \"^${csvDelete_str}${csvDelete_TAB}|^${csvDelete_str}$|${csvDelete_TAB}${csvDelete_str}${csvDelete_TAB}|${csvDelete_TAB}${csvDelete_str}$\""
 			else
-				cmd="${cmd}|egrep \"^${str}${TAB}|^${str}$|${TAB}${str}${TAB}|${TAB}${str}$\""
+				csvDelete_cmd="${csvDelete_cmd}|egrep \"^${csvDelete_str}${csvDelete_TAB}|^${csvDelete_str}$|${csvDelete_TAB}${csvDelete_str}${csvDelete_TAB}|${csvDelete_TAB}${csvDelete_str}$\""
 			fi
 		fi
 		shift
 	done
 
-	if [ "X${tmpfile1}" = "X" ]
+	if [ "X${csvDelete_tmpfile1}" = "X" ]
 	then
-		eval "${cmd}" | join -t "${LF}"  -1 1 -2 1 -v 1 ${file} - >${tmpfile2} && mv -f ${tmpfile2} ${file}
+		eval "${csvDelete_cmd}" | join -t "${csvDelete_LF}"  -1 1 -2 1 -v 1 ${csvDelete_file} - >${csvDelete_tmpfile2} && mv -f ${csvDelete_tmpfile2} ${csvDelete_file}
 	else
-		eval "${cmd}" | join -t "${LF}"  -1 1 -2 1 -v 1 ${tmpfile1} -
-		rm -f ${tmpfile1}
+		eval "${csvDelete_cmd}" | join -t "${csvDelete_LF}"  -1 1 -2 1 -v 1 ${csvDelete_tmpfile1} -
+		rm -f ${csvDelete_tmpfile1}
 	fi
 }
 
@@ -158,109 +158,110 @@ function csvUpdate(){
 		return 0
 	fi
 
-	TAB=`echo -n -e "\t"`
-	LF=`echo -n -e "\n"`
-	RND=${RANDOM}
-	tmpfile1=""
-	tmpfile2=/tmp/csvutil.${RND}.$$.2.tmp	# 更新対象データ
-	tmpfile3=/tmp/csvutil.${RND}.$$.3.tmp	# 更新対象外データ	
-	tmpfile4=/tmp/csvutil.${RND}.$$.4.tmp	# 更新対象データを１項目１行に分解
-	tmpfile5=/tmp/csvutil.${RND}.$$.5.tmp	# 更新トランザクションを１項目１行に分解
-	tmpfile6=/tmp/csvutil.${RND}.$$.6.tmp	# 更新後データを１項目１行に分解
-	tmpfile7=/tmp/csvutil.${RND}.$$.7.tmp	# 更新されなかったデータを１項目１行に分解
-	tmpfile8=/tmp/csvutil.${RND}.$$.8.tmp	# 新規追加項目を１項目１行に分解
-	tmpfile9=/tmp/csvutil.${RND}.$$.9.tmp	# 更新されたレコード
-	tmpfile10=/tmp/csvutil.${RND}.$$.10.tmp	# 項目の順序を保存するファイル
-	tmpfile11=/tmp/csvutil.${RND}.$$.11.tmp	# ソートされたインプット
-	sortSw=off
-	updSw=off
-	file=""
-	cmd=""
-	dat=""
+	csvUpdate_TAB=`echo -n -e "\t"`
+	csvUpdate_LF=`echo -n -e "\n"`
+	csvUpdate_RND=${RANDOM}
+	csvUpdate_tmpfile1=""
+	csvUpdate_tmpfile2=/tmp/csvutil.${csvUpdate_RND}.$$.2.tmp	# 更新対象データ
+	csvUpdate_tmpfile3=/tmp/csvutil.${csvUpdate_RND}.$$.3.tmp	# 更新対象外データ	
+	csvUpdate_tmpfile4=/tmp/csvutil.${csvUpdate_RND}.$$.4.tmp	# 更新対象データを１項目１行に分解
+	csvUpdate_tmpfile5=/tmp/csvutil.${csvUpdate_RND}.$$.5.tmp	# 更新トランザクションを１項目１行に分解
+	csvUpdate_tmpfile6=/tmp/csvutil.${csvUpdate_RND}.$$.6.tmp	# 更新後データを１項目１行に分解
+	csvUpdate_tmpfile7=/tmp/csvutil.${csvUpdate_RND}.$$.7.tmp	# 更新されなかったデータを１項目１行に分解
+	csvUpdate_tmpfile8=/tmp/csvutil.${csvUpdate_RND}.$$.8.tmp	# 新規追加項目を１項目１行に分解
+	csvUpdate_tmpfile9=/tmp/csvutil.${csvUpdate_RND}.$$.9.tmp	# 更新されたレコード
+	csvUpdate_tmpfile10=/tmp/csvutil.${csvUpdate_RND}.$$.10.tmp	# 項目の順序を保存するファイル
+	csvUpdate_tmpfile11=/tmp/csvutil.${csvUpdate_RND}.$$.11.tmp	# ソートされたインプット
+	csvUpdate_sortSw=off
+	csvUpdate_updSw=off
+	csvUpdate_file=""
+	csvUpdate_cmd=""
+	csvUpdate_dat=""
 	while [ "$#" != "0" ]
 	do
-		str="$1"
+		csvUpdate_str="$1"
 		if [ "$#" = "1" ]
 		then
-			if [ "X${str}" = "X-" ]
+			if [ "X${csvUpdate_str}" = "X-" ]
 			then
-				tmpfile1=/tmp/csvutil.${RND}.$$.1.tmp
-				cat >${tmpfile1}
-				file=${tmpfile1}
+				csvUpdate_tmpfile1=/tmp/csvutil.${csvUpdate_RND}.$$.1.tmp
+				cat >${csvUpdate_tmpfile1}
+				csvUpdate_file=${csvUpdate_tmpfile1}
 			else
-				file=${str}
+				csvUpdate_file=${csvUpdate_str}
 			fi
 		else
-			if [ "X${str}" = "X-s" ]
+			if [ "X${csvUpdate_str}" = "X-s" ]
 			then
-				sortSw=on
-			elif [ "X${str}" = "X-d" ]
+				csvUpdate_sortSw=on
+			elif [ "X${csvUpdate_str}" = "X-d" ]
 			then
-				updSw=on
-			elif [ "X${updSw}" = "Xon" ]
+				csvUpdate_updSw=on
+			elif [ "X${csvUpdate_updSw}" = "Xon" ]
 			then
-				str=`echo "$1" | sed -e 's/"/\\"/g'`
-				if [ "X${dat}" = "X" ]
+				csvUpdate_str=`echo "$1" | sed -e 's/"/\\"/g'`
+				if [ "X${csvUpdate_dat}" = "X" ]
 				then
-					dat="${str}"
+					csvUpdate_dat="${csvUpdate_str}"
 				else
-					dat="${dat}${TAB}${str}"
+					csvUpdate_dat="${csvUpdate_dat}${csvUpdate_TAB}${csvUpdate_str}"
 				fi
 			else
-				str=`echo "$1" | sed -e 's/"/\\\\"/g'`
-				if [ "X${cmd}" = "X" ]
+				csvUpdate_str=`echo "$1" | sed -e 's/"/\\\\"/g'`
+				if [ "X${csvUpdate_cmd}" = "X" ]
 				then
-					cmd="egrep \"^${str}${TAB}|^${str}$|${TAB}${str}${TAB}|${TAB}${str}$\""
+					csvUpdate_cmd="egrep \"^${csvUpdate_str}${csvUpdate_TAB}|^${csvUpdate_str}$|${csvUpdate_TAB}${csvUpdate_str}${csvUpdate_TAB}|${csvUpdate_TAB}${csvUpdate_str}$\""
 				else
-					cmd="${cmd}|egrep \"^${str}${TAB}|^${str}$|${TAB}${str}${TAB}|${TAB}${str}$\""
+					csvUpdate_cmd="${csvUpdate_cmd}|egrep \"^${csvUpdate_str}${csvUpdate_TAB}|^${csvUpdate_str}$|${csvUpdate_TAB}${csvUpdate_str}${csvUpdate_TAB}|${csvUpdate_TAB}${csvUpdate_str}$\""
 				fi
 			fi
 		fi
 		shift
 	done
 
-	if [ "X${sortSw}" = "Xon" ]
+	if [ "X${csvUpdate_sortSw}" = "Xon" ]
 	then
-		sort ${file} | tee ${tmpfile11} | eval "$cmd" >${tmpfile2}
-		join -t "${LF}" -1 1 -2 1 -v 1 ${tmpfile11} ${tmpfile2} >${tmpfile3}
+		sort ${csvUpdate_file} | tee ${csvUpdate_tmpfile11} | eval "$csvUpdate_cmd" >${csvUpdate_tmpfile2}
+		join -t "${csvUpdate_LF}" -1 1 -2 1 -v 1 ${csvUpdate_tmpfile11} ${csvUpdate_tmpfile2} >${csvUpdate_tmpfile3}
 	else
-		cat ${file} | eval "$cmd" >${tmpfile2}
-		join -t "${LF}" -1 1 -2 1 -v 1 ${file} ${tmpfile2} >${tmpfile3}
+		cat ${csvUpdate_file} | eval "$csvUpdate_cmd" >${csvUpdate_tmpfile2}
+		join -t "${csvUpdate_LF}" -1 1 -2 1 -v 1 ${csvUpdate_file} ${csvUpdate_tmpfile2} >${csvUpdate_tmpfile3}
 	fi
 
-	touch ${tmpfile9}
-	IFSSAVE="${IFS}"
+	touch ${csvUpdate_tmpfile9}
+	csvUpdate_IFSSAVE="${IFS}"
 	IFS=$'\n'
-	for i in `cat ${tmpfile2}`
+	for i in `cat ${csvUpdate_tmpfile2}`
 	do
-		echo "$i" | tr '\t' '\n' | tr '=' '\t' | cat -n | sed -e 's/^ *//' | sort -t "${TAB}" -k 2,2 >${tmpfile10}
-		echo "$i" | tr '\t' '\n' | tr '=' '\t' | sort >${tmpfile4}
-		echo "${dat}" | tr '\t' '\n' | tr '=' '\t' | sort >${tmpfile5}
-		join -t "${TAB}" -1 1 -2 1 -o 1.1,2.2 ${tmpfile4} ${tmpfile5} >${tmpfile6}
-		join -t "${TAB}" -1 1 -2 1 -v 1 ${tmpfile4} ${tmpfile5} >${tmpfile7}
-		join -t "${TAB}" -1 1 -2 1 -v 2 ${tmpfile4} ${tmpfile5} >${tmpfile8}
+		echo "$i" | tr '\t' '\n' | tr '=' '\t' | cat -n | sed -e 's/^ *//' | sort -t "${csvUpdate_TAB}" -k 2,2 >${csvUpdate_tmpfile10}
+		echo "$i" | tr '\t' '\n' | tr '=' '\t' | sort >${csvUpdate_tmpfile4}
+		echo "${csvUpdate_dat}" | tr '\t' '\n' | tr '=' '\t' | sort >${csvUpdate_tmpfile5}
+		join -t "${csvUpdate_TAB}" -1 1 -2 1 -o 1.1,2.2 ${csvUpdate_tmpfile4} ${csvUpdate_tmpfile5} >${csvUpdate_tmpfile6}
+		join -t "${csvUpdate_TAB}" -1 1 -2 1 -v 1 ${csvUpdate_tmpfile4} ${csvUpdate_tmpfile5} >${csvUpdate_tmpfile7}
+		join -t "${csvUpdate_TAB}" -1 1 -2 1 -v 2 ${csvUpdate_tmpfile4} ${csvUpdate_tmpfile5} >${csvUpdate_tmpfile8}
 		(
-			cat ${tmpfile6} ${tmpfile7} ${tmpfile8} | 
+#				join -t "${csvUpdate_TAB}" -1 2 -2 1 -a 2 -e 65534 -o 1.1,2.1,2.2 ${csvUpdate_tmpfile10} - |
+			cat ${csvUpdate_tmpfile6} ${csvUpdate_tmpfile7} ${csvUpdate_tmpfile8} | 
 				sort | 
-				join -t "${TAB}" -1 2 -2 1 -a 2 -o 1.1,2.1,2.2 ${tmpfile10} - |
-				sed -e "s/^${TAB}/65534${TAB}/" |
-				sort -t "${TAB}" -k 1,1n -k 2,2 |
-				cut -d "${TAB}" -f 2,3 |
+				join -t "${csvUpdate_TAB}" -1 2 -2 1 -a 2 -o 1.1,2.1,2.2 ${csvUpdate_tmpfile10} - |
+				sed -e "s/^${csvUpdate_TAB}/65534${csvUpdate_TAB}/" |
+				sort -t "${csvUpdate_TAB}" -k 1,1n -k 2,2 |
+				cut -d "${csvUpdate_TAB}" -f 2,3 |
 				tr '\t' '=' | 
 				tr '\n' '\t' | 
-				sed -e "s/${TAB}$//"
+				sed -e "s/${csvUpdate_TAB}$//"
 			echo ""
-		) >>${tmpfile9}
+		) >>${csvUpdate_tmpfile9}
 	done
-	IFS="${IFSSAVE}"
+	IFS="${csvUpdate_IFSSAVE}"
 
-	if [ "X${tmpfile1}" = "X" ]
+	if [ "X${csvUpdate_tmpfile1}" = "X" ]
 	then
-		sort ${tmpfile3} ${tmpfile9} >${file}
+		sort ${csvUpdate_tmpfile3} ${csvUpdate_tmpfile9} >${csvUpdate_file}
 	else
-		sort ${tmpfile3} ${tmpfile9}
+		sort ${csvUpdate_tmpfile3} ${csvUpdate_tmpfile9}
 	fi
-	rm -f ${tmpfile1} ${tmpfile2} ${tmpfile3} ${tmpfile4} ${tmpfile5} ${tmpfile6} ${tmpfile7} ${tmpfile8} ${tmpfile9} ${tmpfile10} ${tmpfile11}
+	rm -f ${csvUpdate_tmpfile1} ${csvUpdate_tmpfile2} ${csvUpdate_tmpfile3} ${csvUpdate_tmpfile4} ${csvUpdate_tmpfile5} ${csvUpdate_tmpfile6} ${csvUpdate_tmpfile7} ${csvUpdate_tmpfile8} ${csvUpdate_tmpfile9} ${csvUpdate_tmpfile10} ${csvUpdate_tmpfile11}
 }
 
 function csvGetValue(){
@@ -271,24 +272,24 @@ function csvGetValue(){
 		return 0
 	fi
 
-	record=`echo "$1" | sed -e 's/"/\\"/g'`
-	item=`echo "$2" | sed -e 's/"/\\"/g'`
+	csvGetValue_record=`echo "$1" | sed -e 's/"/\\"/g'`
+	csvGetValue_item=`echo "$2" | sed -e 's/"/\\"/g'`
 
-	TAB=`echo -n -e "\t"`
-	IFSSAVE="${IFS}"
+	csvGetValue_TAB=`echo -n -e "\t"`
+	csvGetValue_IFSSAVE="${IFS}"
 	IFS=$'\n'
-	if [ "X${record}" = "X-" ]
+	if [ "X${csvGetValue_record}" = "X-" ]
 	then
 		for i in `tr '\t' '\n'`
 		do
-			echo "$i" | egrep "^${item}=" | cut -d "=" -f 2-
+			echo "$i" | egrep "^${csvGetValue_item}=" | cut -d "=" -f 2-
 		done
 	else
-		for i in `echo "${record}"|tr '\t' '\n'`
+		for i in `echo "${csvGetValue_record}"|tr '\t' '\n'`
 		do
-			echo "$i" | egrep "^${item}=" | cut -d "=" -f 2-
+			echo "$i" | egrep "^${csvGetValue_item}=" | cut -d "=" -f 2-
 		done
 	fi
-	IFS="${IFSSAVE}"
+	IFS="${csvGetValue_IFSSAVE}"
 }
 
