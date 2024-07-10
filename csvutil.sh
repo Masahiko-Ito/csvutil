@@ -3,12 +3,14 @@
 function csvSearch(){
 	if [ "X$1" = "X-h" -o "X$1" = "X--help" ]
 	then
-		echo 'Usage : csvSearch "item1=value1" "item2=value2" ... {filename|-}'
-		echo 'Search records pointed by items from filename or stdin(-) to stdout.'
+		echo 'Usage : csvSearch [-s] "item1=value1" "item2=value2" ... {filename|-}'
+		echo 'Search records by condition of items from filename or stdin(-) and output to stdout.'
+		echo '  -s    Output should be sorted.'
 		return 0
 	fi
 
 	csvSearch_TAB=`echo -n -e "\t"`
+	csvSearch_sortSw=off
 	csvSearch_cmd=""
 	while [ "$#" != "0" ]
 	do
@@ -17,16 +19,31 @@ function csvSearch(){
 		then
 			if [ "X${csvSearch_str}" = "X-" ]
 			then
-				:
+				if [ "X${csvSearch_sortSw}" = "Xon" ]
+				then
+					csvSearch_cmd="sort|${csvSearch_cmd}"
+				else
+					csvSearch_cmd="cat|${csvSearch_cmd}"
+				fi
 			else
-				csvSearch_cmd="cat ${csvSearch_str}|${csvSearch_cmd}"
+				if [ "X${csvSearch_sortSw}" = "Xon" ]
+				then
+					csvSearch_cmd="sort ${csvSearch_str}|${csvSearch_cmd}"
+				else
+					csvSearch_cmd="cat ${csvSearch_str}|${csvSearch_cmd}"
+				fi
 			fi
 		else
-			if [ "X${csvSearch_cmd}" = "X" ]
+			if [ "X${csvSearch_str}" = "X-s" ]
 			then
-				csvSearch_cmd="egrep \"^${csvSearch_str}${csvSearch_TAB}|^${csvSearch_str}$|${csvSearch_TAB}${csvSearch_str}${csvSearch_TAB}|${csvSearch_TAB}${csvSearch_str}$\""
+				csvSearch_sortSw=on
 			else
-				csvSearch_cmd="${csvSearch_cmd}|egrep \"^${csvSearch_str}${csvSearch_TAB}|^${csvSearch_str}$|${csvSearch_TAB}${csvSearch_str}${csvSearch_TAB}|${csvSearch_TAB}${csvSearch_str}$\""
+				if [ "X${csvSearch_cmd}" = "X" ]
+				then
+					csvSearch_cmd="egrep \"^${csvSearch_str}${csvSearch_TAB}|^${csvSearch_str}$|${csvSearch_TAB}${csvSearch_str}${csvSearch_TAB}|${csvSearch_TAB}${csvSearch_str}$\""
+				else
+					csvSearch_cmd="${csvSearch_cmd}|egrep \"^${csvSearch_str}${csvSearch_TAB}|^${csvSearch_str}$|${csvSearch_TAB}${csvSearch_str}${csvSearch_TAB}|${csvSearch_TAB}${csvSearch_str}$\""
+				fi
 			fi
 		fi
 		shift
@@ -39,7 +56,7 @@ function csvAppend(){
 	if [ "X$1" = "X-h" -o "X$1" = "X--help" ]
 	then
 		echo 'Usage : csvAppend [-s] "item1=value1" "item2=value2" ... {filename|-}'
-		echo 'Append a record into filename. If filename is -, read stdin and append a record into it and output to stdout.'
+		echo 'Append a record into filename. If filename is -, append a record into stdin and output to stdout.'
 		echo '  -s    Output should be sorted.'
 		return 0
 	fi
@@ -100,8 +117,10 @@ function csvAppend(){
 function csvDelete(){
 	if [ "X$1" = "X-h" -o "X$1" = "X--help" ]
 	then
-		echo 'Usage : csvDelete "item1=value1" "item2=value2" ... {filename|-}'
-		echo 'Delete records pointed by items from filename. If filename is -, read stdin and delete records from it and output to stdout.'
+		echo 'Usage : csvDelete [-s] "item1=value1" "item2=value2" ... {filename|-}'
+		echo 'Delete records by condition of items from filename. If filename is -, delete records from stdin and output to stdout.'
+		echo '  -s                    force to sort input before delete.'
+		echo 'Caution: Input records must be sorted and output is always sorted.'
 		return 0
 	fi
 
@@ -110,7 +129,9 @@ function csvDelete(){
 	RND=${RANDOM}
 	csvDelete_tmpfile1=""
 	csvDelete_tmpfile2=/tmp/csvutil.${RND}.$$.2.tmp
+	csvDelete_tmpfile3=/tmp/csvutil.${RND}.$$.3.tmp
 	csvDelete_file=""
+	csvDelete_sortSw=off
 	csvDelete_cmd=""
 	while [ "$#" != "0" ]
 	do
@@ -120,18 +141,33 @@ function csvDelete(){
 			if [ "X${csvDelete_str}" = "X-" ]
 			then
 				csvDelete_tmpfile1=/tmp/csvutil.${RND}.$$.1.tmp
-				cat >${csvDelete_tmpfile1}
+				if [ "X${csvDelete_sortSw}" = "Xon" ]
+				then
+					sort >${csvDelete_tmpfile1}
+				else
+					cat >${csvDelete_tmpfile1}
+				fi
 				csvDelete_cmd="cat ${csvDelete_tmpfile1}|${csvDelete_cmd}"
 			else
 				csvDelete_file=${csvDelete_str}
+				if [ "X${csvDelete_sortSw}" = "Xon" ]
+				then
+					sort "${csvDelete_str}" >"${csvDelete_tmpfile3}"
+					mv -f "${csvDelete_tmpfile3}" "${csvDelete_str}"
+				fi
 				csvDelete_cmd="cat ${csvDelete_str}|${csvDelete_cmd}"
 			fi
 		else
-			if [ "X${csvDelete_cmd}" = "X" ]
+			if [ "X${csvDelete_str}" = "X-s" ]
 			then
-				csvDelete_cmd="egrep \"^${csvDelete_str}${csvDelete_TAB}|^${csvDelete_str}$|${csvDelete_TAB}${csvDelete_str}${csvDelete_TAB}|${csvDelete_TAB}${csvDelete_str}$\""
+				csvDelete_sortSw=on
 			else
-				csvDelete_cmd="${csvDelete_cmd}|egrep \"^${csvDelete_str}${csvDelete_TAB}|^${csvDelete_str}$|${csvDelete_TAB}${csvDelete_str}${csvDelete_TAB}|${csvDelete_TAB}${csvDelete_str}$\""
+				if [ "X${csvDelete_cmd}" = "X" ]
+				then
+					csvDelete_cmd="egrep \"^${csvDelete_str}${csvDelete_TAB}|^${csvDelete_str}$|${csvDelete_TAB}${csvDelete_str}${csvDelete_TAB}|${csvDelete_TAB}${csvDelete_str}$\""
+				else
+					csvDelete_cmd="${csvDelete_cmd}|egrep \"^${csvDelete_str}${csvDelete_TAB}|^${csvDelete_str}$|${csvDelete_TAB}${csvDelete_str}${csvDelete_TAB}|${csvDelete_TAB}${csvDelete_str}$\""
+				fi
 			fi
 		fi
 		shift
@@ -142,15 +178,15 @@ function csvDelete(){
 		eval "${csvDelete_cmd}" | join -t "${csvDelete_LF}"  -1 1 -2 1 -v 1 ${csvDelete_file} - >${csvDelete_tmpfile2} && mv -f ${csvDelete_tmpfile2} ${csvDelete_file}
 	else
 		eval "${csvDelete_cmd}" | join -t "${csvDelete_LF}"  -1 1 -2 1 -v 1 ${csvDelete_tmpfile1} -
-		rm -f ${csvDelete_tmpfile1}
 	fi
+	rm -f ${csvDelete_tmpfile1} ${csvDelete_tmpfile2} ${csvDelete_tmpfile3}
 }
 
 function csvUpdate(){
 	if [ "X$1" = "X-h" -o "X$1" = "X--help" ]
 	then
 		echo 'Usage : csvUpdate [-s] "item1=value1" "item2=value2" ... -d "item3=value3" "item4=value4" ... {filename|-}'
-		echo 'Update records pointed by items in filename. If filename is -, read stdin and update records from it and output to stdout.'
+		echo 'Update records by condition of items in filename. If filename is -, update records in stdin and output to stdout.'
 		echo '  -s                    force to sort input before update.'
 		echo '  -d "item=value"       "item=value" before -d are keys point records to update.'
 		echo '                        "item=value" after -d are new values.'
